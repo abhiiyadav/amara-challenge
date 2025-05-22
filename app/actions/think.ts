@@ -65,8 +65,8 @@ export async function think(userMessage: string, csvHeader: string) {
       explanation: explanation.choices[0].message.content,
       candidates: ranked.slice(0, 3),
     };
-  } catch (e: any) {
+  } catch (e) {
     console.error('Error in think():', e);
-    return { error: 'Something went wrong. Possibly invalid JSON from LLM.', details: e.message };
+    return { error: 'Something went wrong. Possibly invalid JSON from LLM.', details: e };
   }
 }

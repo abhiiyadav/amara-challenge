@@ -1,31 +1,24 @@
 'use client';
-import React, { use, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Image from 'next/image';
 import BotMessage from "../app/components/Message/Bot-Message";
 import UserMessage from "./components/Message/User-Message";
 import ChatbotIntro from "./components/Cards/Intro-Card";
 import { think } from '../app/actions/think';
 import BotLoader from "./components/Message/Bot-Loader";
-import {
-  loadCandidatesFromCSV,
-  filterCandidates,
-  rankCandidates,
-} from '../utils/utils';
 
 export default function Home() {
   
-  const [chatMessages, setChatMessages] = React.useState([]);
-  const [botMessage, setBotMessage] = React.useState("");
-  const [userMessage, setUserMessage] = React.useState("");
+  const [chatMessages, setChatMessages] = useState<React.ReactElement[]>([]);
   const [input, setInput] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
-  const [finalCandidates, setFinalCandidates] = React.useState([]);
-  const lastMessageRef = useRef(null);
+  const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
   const appendUserMessage = (message: string) => {
     processUserMessage(message);
     setChatMessages((prevMessages) => [
       ...prevMessages,
-      <UserMessage text={message} />,
+      <UserMessage key={`user-${Date.now()}`} text={message} />,
     ]);
     setInput("");
   };
@@ -33,7 +26,7 @@ export default function Home() {
   const appendBotMessage = (message: string) => {
     setChatMessages((prevMessages) => [
       ...prevMessages,
-      <BotMessage text={message} />,
+      <BotMessage key={`bot-${Date.now()}`} text={message} />,
     ]);
   };
 
@@ -55,11 +48,8 @@ export default function Home() {
     if (result.error) {
       appendBotMessage("Error: " + result.error);
     } else {
-      const { filter, rank } = result;
-      // appendBotMessage("Here are the top candidates based on your request:");
       if(result){
-        appendBotMessage(result?.explanation);
-        console.log("le beta: ", result);
+        appendBotMessage(result?.explanation ?? "Couldn't generate a response");
         result?.candidates?.slice(0, 3).forEach(candidate => {
           appendBotMessage(
             `👤 ${candidate.full_name} — ${candidate.title} (${candidate.years_experience} yrs)\n` +
@@ -72,18 +62,7 @@ export default function Home() {
       else{
         appendBotMessage("No candidates found.");
       }
-      
-      // appendBotMessage("JSON: " + JSON.stringify(result));
-      // try{
-      //   const candidates = loadCandidatesFromCSV();
-      //   const filtered = filterCandidates(candidates, result?.filter);
-      //   const ranked = rankCandidates(filtered, result?.rank);
-      //   setFinalCandidates(ranked);
-      // }
-      // catch (error) {
-      //   appendBotMessage("Error: " + error);
-      // }
-      // appendBotMessage("Filtered and ranked candidates successfully." + JSON.stringify(finalCandidates));
+  
     }
     setIsLoading(false);
   };
@@ -93,13 +72,14 @@ export default function Home() {
     await headers.then((resolvedHeaders) => {
       sendMessageToBot(message, resolvedHeaders.join(', '));
     }).catch((error) => {
+      console.error('Error fetching CSV headers:', error);
     });
   };
 
   useEffect(() => {
     setChatMessages((prevMessages) => [
       ...prevMessages,
-      <BotMessage text="How can I assist you today?" />,
+      <BotMessage key="1" text="How can I assist you today?" />,
     ]);
   }, []);
 
@@ -147,7 +127,7 @@ export default function Home() {
                     disabled={isLoading}
                   />
                   <button className="ml-2 bg-white" onClick={() => appendUserMessage(input)} disabled={isLoading}>
-                    <img className="h-5 w-5" src="/send-message-icon.svg" alt="send message" />
+                    <Image width={20} height={20} src="/send-message-icon.svg" alt="send message" />
                   </button>
                 </div>
                 <div className="mt-4 text-center text-gray-500 text-xs">
