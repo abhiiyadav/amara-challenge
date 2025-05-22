@@ -62,7 +62,6 @@ export default function Home() {
       else{
         appendBotMessage("No candidates found.");
       }
-  
     }
     setIsLoading(false);
   };
