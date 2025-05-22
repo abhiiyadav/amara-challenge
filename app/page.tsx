@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 import React, { useState, useEffect, useRef } from "react";
 import Image from 'next/image';
 import BotMessage from "../app/components/Message/Bot-Message";
